@@ -32,7 +32,6 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
-    "prepare": "tsc",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
