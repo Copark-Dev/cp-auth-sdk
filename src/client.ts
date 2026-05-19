@@ -183,23 +183,68 @@ export class CpAuthClient {
   // ─── OAuth ─────────────────────────────────────────────────────────
 
   /**
-   * Kick off an OAuth login. Detects in-app browsers and short-circuits
-   * with `{ blocked: true, info }` for Google/Apple — caller should show
-   * a "open in Safari/Chrome" UI in that case instead of redirecting.
-   * Kakao still works inside in-app webviews so it's never blocked.
+   * Kick off an OAuth login. Three modes when an in-app browser is
+   * detected and the provider is one Google blocks (google/apple):
+   *
+   *   - `onInApp: "modal"` (default) — return `{ blocked: true, info }`
+   *     so the caller can show <InAppBrowserModal/> or equivalent UI.
+   *   - `onInApp: "auto-escape"` — on Android, navigate the page
+   *     immediately to a Chrome intent URL so the user lands in Chrome
+   *     without seeing any modal. iOS falls back to `blocked: true`
+   *     because Apple blocks programmatic Safari escape. Saves user
+   *     from one extra tap on Android (the most common case).
+   *   - `onInApp: "ignore"` — opt out of the gate entirely. Useful for
+   *     test fixtures and native apps where in-app detection doesn't
+   *     apply (SFSafariViewController / Custom Tabs handle OAuth fine).
+   *
+   * Kakao never triggers the gate (works in-app on iOS via
+   * SFSafariViewController and on Android via Custom Tabs).
+   *
+   * Set `strict: true` to also catch unknown in-app webviews not in
+   * the blacklist (Toss / Coupang / less common banks / Discord on
+   * older builds / etc.). Default off to avoid false positives on
+   * fringe-but-legitimate browsers.
    */
   async startOAuth(
     provider: OAuthProvider,
-    redirectPath: string = "/auth/callback",
+    redirectPathOrOpts:
+      | string
+      | {
+          redirectPath?: string;
+          onInApp?: "modal" | "auto-escape" | "ignore";
+          strict?: boolean;
+        } = "/auth/callback",
   ): Promise<
     | { blocked: true; info: ReturnType<typeof detectInAppBrowser> }
     | { blocked: false; url: string }
+    | { blocked: false; redirected: true } // auto-escape on Android
   > {
+    const opts =
+      typeof redirectPathOrOpts === "string"
+        ? { redirectPath: redirectPathOrOpts }
+        : redirectPathOrOpts;
+    const redirectPath = opts.redirectPath ?? "/auth/callback";
+    const onInApp = opts.onInApp ?? "modal";
+
     const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
-    const info = detectInAppBrowser(ua);
-    if (info.isInApp && (provider === "google" || provider === "apple")) {
+    const info = detectInAppBrowser(ua, { strict: opts.strict ?? false });
+    const isBlockedProvider = provider === "google" || provider === "apple";
+
+    if (info.isInApp && isBlockedProvider && onInApp !== "ignore") {
+      // Android: try to escape to Chrome directly so the user doesn't
+      // need to interact with a modal. Works whenever Android-with-Chrome
+      // is installed (~99% of Korean Android users).
+      if (
+        onInApp === "auto-escape" &&
+        info.isAndroid &&
+        typeof window !== "undefined"
+      ) {
+        window.location.href = buildChromeIntentUrl(window.location.href);
+        return { blocked: false, redirected: true };
+      }
       return { blocked: true, info };
     }
+
     const callbackUrl = `${this.productOrigin}${redirectPath}`;
     const r = await fetch(
       `${this.authUrl}/auth/oauth/url?provider=${provider}&redirect_url=${encodeURIComponent(callbackUrl)}`,

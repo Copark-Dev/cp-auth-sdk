@@ -1,6 +1,6 @@
 {
   "name": "@cp-platform/auth-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CP Platform unified-identity SDK for external products (your-product, another-product, ...). Wraps cp-auth REST API, handles in-app browser OAuth gates, and provides JWT verification helpers for backends.",
   "type": "module",
   "main": "./dist/index.js",
