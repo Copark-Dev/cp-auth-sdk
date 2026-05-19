@@ -1,0 +1,73 @@
+{
+  "name": "@cp-platform/auth-sdk",
+  "version": "0.1.0",
+  "description": "CP Platform unified-identity SDK for external products (your-product, another-product, ...). Wraps cp-auth REST API, handles in-app browser OAuth gates, and provides JWT verification helpers for backends.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./jwt": {
+      "types": "./dist/jwt.d.ts",
+      "import": "./dist/jwt.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "cp-platform",
+    "auth",
+    "sso",
+    "oauth",
+    "in-app-browser",
+    "threads",
+    "supabase"
+  ],
+  "author": "CP Platform",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Copark-Dev/cp-platform.git",
+    "directory": "packages/cp-auth-sdk"
+  },
+  "peerDependencies": {
+    "jose": ">=5",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "jose": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "jose": "^5.9.6",
+    "react": "^19.0.0",
+    "typescript": "^5.6.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
