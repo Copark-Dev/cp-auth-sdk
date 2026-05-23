@@ -1,6 +1,6 @@
 # @cp-platform/auth-sdk
 
-Federated-identity SDK for external products built on top of CP Platform (`your-product`, `another-product`, …).
+Federated-identity SDK for external products built on top of CP Platform.
 
 Wraps cp-auth's REST API, handles in-app browser OAuth gating (Threads / Instagram / KakaoTalk / …), and ships a backend JWT verifier for product servers.
 
@@ -190,7 +190,7 @@ Defaults point at the production cp-platform Supabase JWKS endpoint — no confi
 
 ## Migration from self-hosted Supabase auth
 
-If your product already runs its own `auth.users` (like `your-product` did):
+If your product already runs its own `auth.users`:
 
 1. Add `cp_user_id UUID UNIQUE` to your `profiles` (or equivalent) table.
 2. For each existing user, look up their cp-platform UUID (by email) and `UPDATE … SET cp_user_id = …`.
