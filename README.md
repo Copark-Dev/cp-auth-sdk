@@ -188,6 +188,48 @@ Defaults point at the production cp-platform Supabase JWKS endpoint — no confi
 
 ---
 
+## Use — Identity (adult) verification
+
+Server-side only for the API calls (the key needs the `identity.verify` permission).
+
+```ts
+import { CpIdentityClient } from "@cp-platform/auth-sdk/identity";
+
+const identity = new CpIdentityClient({ apiKey: process.env.CP_API_KEY! });
+
+// 1. Server: start. Keep verificationId + txId in your DB, tied to the user.
+const start = await identity.startVerification({
+  userRef: session.userId,                 // from your session, never the client
+  successUrl: "https://your-app.example/identity/return",
+});
+// → send { verificationId, provider, sdk, authUrl } to the client (no txId needed there)
+
+// 3. Server: confirm with the txId you stored, not one echoed by the client.
+const r = await identity.confirmVerification(start.verificationId, {
+  txId: stored.txId,
+  userRef: session.userId,
+});
+if (r.verified && r.isAdult && !(isProd && (r.sandbox || r.mode === "test"))) {
+  // store r.ciHash (unique per person for your app) + r.birthYear
+}
+```
+
+Browser step (2):
+
+```ts
+import { runIdentityVerification } from "@cp-platform/auth-sdk/identity";
+const outcome = await runIdentityVerification(startFromServer); // UX hint only
+// then ask your server to confirm
+```
+
+Mobile apps: host a tiny static page that calls `runIdentityVerification` (or
+`PortOne.requestIdentityVerification(sdk.params)` directly) and open it in an
+auth session browser; `redirectUrl` brings the user back.
+
+Errors are `CpIdentityApiError` with `status` + `code` — e.g. `503 IDENTITY_NOT_CONFIGURED`
+(live provider not set up yet), `403 USER_REF_MISMATCH`, `409 NOT_COMPLETED`.
+The result never includes name, phone number or raw CI/DI.
+
 ## Migration from self-hosted Supabase auth
 
 If your product already runs its own `auth.users`:
