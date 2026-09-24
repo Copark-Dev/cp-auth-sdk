@@ -84,6 +84,14 @@ export interface VerificationResult {
   [key: string]: unknown;
 }
 
+export interface IdentityAvailability {
+  mode: "test" | "live";
+  provider: "portone" | "toss_cert" | "sandbox";
+  sandbox: boolean;
+  /** false → start/confirm would end in 503 IDENTITY_NOT_CONFIGURED. */
+  available: boolean;
+}
+
 export class CpIdentityApiError extends Error {
   status: number;
   /** e.g. IDENTITY_NOT_CONFIGURED (503), USER_REF_MISMATCH (403), NOT_COMPLETED (409). */
@@ -111,6 +119,14 @@ export class CpIdentityClient {
         "CpIdentityClient: global fetch is unavailable. Provide one via config.fetch.",
       );
     }
+  }
+
+  /**
+   * Can this key complete a verification right now? Creates nothing. Use it to
+   * switch your gate on automatically; in production don't count sandbox as available.
+   */
+  getAvailability(): Promise<IdentityAvailability> {
+    return this.request<IdentityAvailability>("GET", "/identity/availability");
   }
 
   startVerification(

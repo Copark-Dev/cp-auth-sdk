@@ -44,6 +44,13 @@ export class CpIdentityClient {
             throw new Error("CpIdentityClient: global fetch is unavailable. Provide one via config.fetch.");
         }
     }
+    /**
+     * Can this key complete a verification right now? Creates nothing. Use it to
+     * switch your gate on automatically; in production don't count sandbox as available.
+     */
+    getAvailability() {
+        return this.request("GET", "/identity/availability");
+    }
     startVerification(input) {
         return this.request("POST", "/identity/verifications", input);
     }
