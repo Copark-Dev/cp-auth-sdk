@@ -1,6 +1,6 @@
 {
   "name": "@cp-platform/auth-sdk",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "CP Platform unified-identity SDK for external products. Wraps cp-auth REST API, handles in-app browser OAuth gates, and provides JWT verification helpers for backends.",
   "type": "module",
   "main": "./dist/index.js",
@@ -51,8 +51,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Copark-Dev/cp-platform.git",
-    "directory": "packages/cp-auth-sdk"
+    "url": "git+https://github.com/Copark-Dev/cp-auth-sdk.git"
   },
   "peerDependencies": {
     "jose": ">=5",

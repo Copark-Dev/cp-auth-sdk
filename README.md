@@ -21,11 +21,13 @@ This SDK gives products everything they need to plug into that model without re-
 ## Install
 
 ```bash
-npm i @cp-platform/auth-sdk
+npm i git+https://github.com/Copark-Dev/cp-auth-sdk.git#v0.5.2
 # peer deps:
 npm i jose           # required only if you use /jwt subexport (backend)
 npm i react          # required only if you use /react subexport
 ```
+
+The package is distributed from GitHub; it is not published on npm yet.
 
 ## Use — Frontend
 
